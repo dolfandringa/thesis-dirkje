@@ -1,0 +1,135 @@
+---
+title: "Effect of nursery habitat availability to coral reef fish species"
+author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
+date: "April 9, 2016"
+output:
+  html_document: default
+  word_document:
+    fig_caption: yes
+    fig_width: 8
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readODS)
+library(stringr)
+library(plyr)
+```
+Read the spreadsheets (open document spreadsheet) and make a copy that we can use for processing the data.
+```{r readfile}
+df.raw <- read_ods(path='../Data_Surveys.ods',sheet=2,col_types = c(text,numeric,numeric,numeric,numeric,numeric,numeric,numeric,numeric,date))
+df.species <- as.data.frame(read_ods(path='../indicator_species.ods',sheet=1,col_types = c(text,text)))
+df.species_dirkje <- as.data.frame(read_ods(path='../indicator_species.ods',sheet=2,col_types = c(text,text)))
+df.species_all <- rbind(df.species, df.species_dirkje)
+df.processed <- df.raw
+```
+
+Check the summary of the data. As you can see below, all variables are text variables which they shouldn't be.
+```{r summary_pre_correction}
+summary(df.raw)
+```
+
+Next we'll correct the values next. First convert the DATE column to a Date value.
+Then loop over the variables with integers (whole numbers) and correct those to integers.
+Lastly, the variables that are actually grouping variables (factors) should be delared as such. So loop over those variables and correct them too.
+```{r correct_values}
+
+
+#Set the date value as a Date.
+df.processed$DATE=as.Date(df.processed$DATE)
+
+for (col in c('0-20','25-45','50-70','75-95','LOCATION','DEPTH','OBSERVER')){
+  df.processed[,c(col)] <- as.integer(df.processed[,c(col)])
+}
+for (col in c('LOCATION','DEPTH','OBSERVER')){
+  df.processed[,c(col)] <- as.factor(df.processed[,c(col)])
+}
+df.processed$SPECIES <- factor(df.processed$SPECIES)
+```
+And get another summary.
+```{r summary_post_correction}
+summary(df.processed)
+```
+
+
+## Data mangling to get the species right.
+
+```{r species_mangling}
+
+#for the species list, make a new column with the common name where all spaces and - are removed and it is converted to lower case.
+#This it is easier ti match the species names without problems with different spelling.
+
+replace_species <- data.frame(wrong=c("checkered snapper","Diagonal banded sweetlip","linecheecked wrasse","Linedcheecked Wrasse","Sixtripe wrasse","Splendid soldier"), right=c('Chequered Snapper',"Diagonal banded sweetlips",'Linedcheeked Wrasse','Linedcheeked Wrasse','Sixstripe Wrasse','Splendid Soldierfish'))
+
+df.processed$SPECIES <- mapvalues(df.processed$SPECIES, as.character(replace_species$wrong), as.character(replace_species$right))
+
+df.species_all$common_name_mangled <- str_to_lower(str_replace_all(str_replace_all(str_replace_all(df.species_all$common_name,' ',''),'-',''),'\'',''))
+df.species_all$colname <- str_to_lower(str_replace(df.species_all$scientific_name,' ','_'))
+
+#Do the same with the imported data.
+df.processed$common_name_mangled <- str_to_lower(str_replace_all(str_replace_all(str_replace_all(df.processed$SPECIES,' ',''),'-',''),'\'',''))
+
+#Join the indicator species list to the imported data so we also have the scientific name and other info in there.
+df.processed<- merge(x = df.processed, y = df.species_all, by = "common_name_mangled", all.x = TRUE)
+
+#Get all species that don't contain a scientific name. There's probably a mis spelling with the common name.
+unique(df.processed[is.na(df.processed_merged$scientific_name),c('SPECIES')])
+
+```
+
+
+## Convert data to columns.
+
+```{r data_transform}
+
+#create a list with column names
+colnames <- c(c('location','depth','date','transect'),sort(df.species_all$colname))
+
+#a mapping of the transect names to the corresponding columns in the excel sheet
+transects <- list('0-20','25-45','50-70','75-95')
+
+#function to combine the data from the df.processed dataframe into a list of rows with all data per sample/transect.
+get_sample_data <-function(row){
+  r <- list(location=row$LOCATION,depth=row$DEPTH,date=row$DATE,transect=row$y)
+  for (sp in sort(df.species_all$colname)){
+    spec_rows <- subset(df.processed,df.processed$colname==sp & df.processed$DEPTH==row$DEPTH & df.processed$LOCATION==row$LOCATION & df.processed$DATE==row$DATE)
+    if(nrow(spec_rows)==0){
+      num = 0
+    }
+    else{
+      tname <- transects[[row$y]]
+      num = sum(spec_rows[tname])
+    }
+    r[c(sp)] <- num
+  }
+  return(r)
+}
+
+unique_samples <- merge(unique(df.processed[,c('LOCATION','DEPTH','DATE')]),c(1,2,3,4))
+res<-by(unique_samples, 1:nrow(unique_samples), get_sample_data)
+df.sample_data <- data.frame(do.call("rbind", res))
+
+```
+## Print the data
+```r{ display_data echo=FALSE, eval=TRUE}
+knitr::kable(divs[order(divs$family,divs$div),])
+```
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
