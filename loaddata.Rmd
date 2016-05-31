@@ -1,9 +1,10 @@
 ---
-title: "Effect of nursery habitat availability to coral reef fish species"
+title: "Data loading and transformation"
 author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
 date: "April 9, 2016"
 output:
   html_document: default
+  pdf_document: default
   word_document:
     fig_caption: yes
     fig_width: 8
@@ -18,13 +19,25 @@ library(plyr)
 Read the spreadsheets (open document spreadsheet) and make a copy that we can use for processing the data.
 ```{r readfile}
 df.raw <- read_ods(path='../Data_Surveys_dirkje.ods',sheet=2,col_types = c(text,numeric,numeric,numeric,numeric,numeric,numeric,numeric,numeric,date))
-df.species <- as.data.frame(read_ods(path='../indicator_species.ods',sheet=1,col_types = c(text,text)))
-df.species_dirkje_only <- as.data.frame(read_ods(path='../indicator_species.ods',sheet=2,col_types = c(text,text)))
-df.species_nursery <- as.data.frame(read_ods(path='../indicator_species.ods',sheet=3,col_types = c(text,text)))
+df.species <- as.data.frame(read_ods(path='../indicator_species2.ods',sheet=1,col_types = c(text,text)))
+df.species_dirkje_only <- as.data.frame(read_ods(path='../indicator_species2.ods',sheet=2,col_types = c(text,text)))
+df.species_nursery <- as.data.frame(read_ods(path='../indicator_species2.ods',sheet=3,col_types = c(text,text)))
 df.species_all <- rbind(df.species, df.species_dirkje_only)
+df.species_all$nursery <- str_to_lower(df.species_all$scientific_name) %in% str_to_lower(df.species_nursery$scientific_name)
 df.processed <- df.raw
+```
 
-sites <- c('Antulang','Guinsuan','Malatapay','Andulay','Basak','Lutoban South','Lutoban Pier','Kookoos Nest','Dauin Poblacion')
+Next we'll create data per site. This will contain the site name, and distance and size of the nursery habitats. We'll use this data for data analysis, but also to set nice names in the final dataframe (df.sample_data).
+```{r site_data}
+df.sites <- list() #empty list
+df.sites$name <- c('Antulang','Guinsuan','Malatapay','Andulay','Basak','Lutoban South','Lutoban Pier','Kookoos Nest','Dauin Poblacion') #add the names
+df.sites$distance_seagrass <- c(25,15,53,106,49,22,9,1511,15) 
+df.sites$size_seagrass <- c(0.15,1.83,0.65,0.01,3.89,15.34,15.18,0.05,0.13)
+df.sites$distance_mangroves <- sample(1:1000, 9)
+df.sites$size_mangroves <- sample(1:400, 9)
+df.sites <- data.frame(df.sites)
+
+#we also want nice names for the observers and depths.
 depth <- c("5m","10m")
 observer <- c('Dolf','Annelies','Dirkje','Jorien','Kallum','Emily','Melina','Rosaly','Jess','Jelle','Anna')
 ```
@@ -46,7 +59,7 @@ df.processed$DATE=as.Date(df.processed$DATE)
 for (col in c('0-20','25-45','50-70','75-95','LOCATION','DEPTH','OBSERVER')){
   df.processed[,c(col)] <- as.integer(df.processed[,c(col)])
 }
-df.processed$LOCATION <- factor(df.processed$LOCATION,c(1,2,3,4,5,6,7,8,9), labels=sites)
+df.processed$LOCATION <- factor(df.processed$LOCATION,c(1,2,3,4,5,6,7,8,9), labels=df.sites$name)
 df.processed$DEPTH <- factor(df.processed$DEPTH,c(1,2), labels=depth)
 df.processed$OBSERVER <- factor(df.processed$OBSERVER,c(1,2,3,4,5,6,7,8,9,10,11), labels=observer)
 df.processed$SPECIES <- factor(df.processed$SPECIES)
@@ -122,6 +135,21 @@ for (sp in sort(df.species_all$colname)){
 }
 
 ```
+## Calculate presence/absence data
+Now we need to also get presence absence data for the species. This will double the amount of columns, so we have one column for each species with the amount of fish on that sample/transect, and one column per species with a 1 or 0 if the species was seen on that sample/transect. Once we have those columns, we can count the species and use it for logisitic regression and such.
+
+```{r presence_absence_calculation}
+df.species_all$colname_pres <- paste0(df.species_all$colname,"_pres")
+for (sp in sort(df.species_all$colname)){
+  #loop over all species
+  colname <- c(paste0(sp,"_pres"))
+  #create a new column with named <speciesname>_pres. Fill it with the values from df.sample_data[<speciesname>] by testing if the value for that column is >0 or not. If it is, fill in a 1, else a 0.
+  df.sample_data[colname] <- apply(df.sample_data[c(sp)], MARGIN=1, function(x){
+    return(ifelse(x>0,1,0))
+  })
+}
+```
+
 ## Print the data
 ```{r display_data, message=FALSE, echo=FALSE, eval=TRUE}
 knitr::kable(df.sample_data)
@@ -129,5 +157,5 @@ knitr::kable(df.sample_data)
 
 ## Save the data in a file that we can import in different R analyses.
 ```{r save}
-save(df.sample_data,df.species_all,df.species_nursery,list=c("df.sample_data","df.species_all","df.species_nursery"), file="data.RDa")
+save(df.raw,df.processed,df.sample_data,df.species_all,df.sites,list=c("df.raw","df.processed","df.sample_data","df.species_all","df.sites"), file="data.RDa")
 ```

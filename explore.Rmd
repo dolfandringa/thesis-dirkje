@@ -1,0 +1,242 @@
+---
+title: "Exploratory analysis"
+author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
+date: "28 May 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+load('data.RDa') #load the data
+library('vegan')
+library('ggplot2')
+nursery_species <- subset(df.species_all, df.species_all$nursery) 
+```
+
+## Calculate some info per sample
+We want to have a few extra metrics per sample, like the Shannon-Wiener diversity, the total number of fish and total number of species (both for all species and just the nursery species).
+
+The diversity function from the vegan package calculates the Shannon-Wiener diversity. It does this for each sample/transect (row) by using the data for some or all columns. As there are columns in df.sample_data that have noting to do with species numbers (such as location, date, depth), we need to calculate the Shannon-Wiener diversity only for the columns containing species abundance data. And we also want to calculate it for a subset of species (the nursery species), for which we can use a subset of all species columns.
+
+As we have a list of all species, including the corresponding column names in ```df.species_all``` (be sure to look at the data), we can use that to select columns form ```df.sample_data```.
+With ```df.sample_data[df.species_all$colname]``` we select those columns from df.sample_data for which the column name exists in ```df.species_all$colname```. We can create any list of column names and select those columns in ```df.sample_data```.
+
+For instance with ```df.sample_data[c("location","depth")]``` We select only the location and depth columns from ```df.sample_data```. And by specifying ```df.sample_data[df.species_all[df.species_all$nursery,c('colname')]]``` we first select the species from ```df.species_all``` where the variable nursery is TRUE, then for those species select the colname variable, and then select the columns those species in ```df.sample_data```. But this list of species was already stored in ```nursery_species``` (see the top of this file), so we could have also done ```df.sample_data[nursery_species$colname]``` with exactly the same result.
+
+See for more info http://rprogramming.net/subset-data-in-r/ http://www.ats.ucla.edu/stat/r/faq/subset_R.htm and http://www.dummies.com/how-to/content/how-to-subset-data-frames-in-r.html.
+
+The last thing below is the apply function. It allows us to apply a function to the rows or columns of our dataframe.
+In this case we use it to apply a function to each row, and store the resulting value as a new variable in that row.
+This was we can calculate the diversity for each row by using a subset of the columns of that row, and store the result in the ```df.sample_diversity``` variable. We can do the same with the sum function and selecting only the presence/absence columns. That way it counts the total number of species for the selected columns (summing all 1 values of our presence/absence data results in the number of species). And we can also take the sum of the abundance, which will give us the number of fish.
+
+The MARGIN=1 argument makes sure we apply it row-by-row. See the documentation of the apply function (use the help in RStudio) for more info on apply.
+
+This way we can create new variables in df.sample_data
+```{r calculation}
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for all species
+df.sample_data$diversity <- apply(df.sample_data[df.species_all$colname], MARGIN=1, diversity)
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for nursery species
+df.sample_data$nursery_diversity <- apply(df.sample_data[nursery_species$colname], MARGIN=1, diversity)
+
+#calculate number of species for all species by summing the presence/absence columns for those species
+df.sample_data$num_species <- apply(df.sample_data[c(df.species_all$colname_pres)],MARGIN=1,sum)
+#calculate number of species for nursery species by summing the presence/absence columns for those species
+df.sample_data$num_nursery_species <- apply(df.sample_data[c(nursery_species$colname_pres)],MARGIN=1,sum)
+
+#calculate number of fish
+df.sample_data$num_fish <- apply(df.sample_data[c(df.species_all$colname)],MARGIN=1,sum)
+#calculate number of nursery fish
+df.sample_data$num_nursery_fish <- apply(df.sample_data[c(nursery_species$colname)],MARGIN=1,sum)
+```
+
+## Nursery species
+Create a subset of the data for only the nursery species by creating a list of columns to include, and then making a new dataframe with only those colunms.
+
+```{r subset_nursery_species}
+nursery_columns <- c(c("location","depth","transect","date","nursery_diversity","num_nursery_species","num_nursery_fish"),nursery_species$colname, nursery_species$colname_pres) #columns for nursery species analysis
+df.nursery_sample_data <- df.sample_data[nursery_columns] # subset of the data with only the nursery species
+```
+
+## Summary
+
+It is good to first have a summary of your data frame to see if there are any strange things showing up (NA values, values that are too high/low, etc).
+
+```{r summary}
+summary(df.sample_data[c("location","depth","transect","date","diversity","num_species","num_fish")])
+summary(df.nursery_sample_data[c("location","depth","transect","date","nursery_diversity","num_nursery_species","num_nursery_fish")])
+```
+## Statistics per site
+We want to see some data per site with mean, standard deviation, number of rows (n) and sum of the number of species and diversity of both all species and the nursery species.
+
+The aggregate function calculates aggregate values. Here we select first only a number of columns that we want to have aggregate statistics on by specifying ```c('num_species','diversity','num_nursery_species','nursery_diversity')```
+Then we select what we want to aggregate these variables by with ```by=list(df.sample_data$location)```.
+Lastly we tell the aggregate function how to aggregate the data. We make a very simple that calculates and returns the mean, sum, sd (standard deviation) and number of values.
+Everything is stored in df.summarydata.
+```{r summary_per_site}
+df.summarydata <- aggregate(df.sample_data[c('num_species','diversity','num_nursery_species','nursery_diversity')], by=list(df.sample_data$location), FUN=function(x) c(mean=mean(x), sum=sum(x),sd=sd(x),n=length(x)))
+df.summarydata <- do.call(data.frame, df.summarydata)
+```
+This is the result.
+```{r display_summary_per_site, warning=FALSE, message=FALSE, echo=FALSE, eval=TRUE}
+knitr::kable(df.summarydata)
+```
+
+Next we want to plot some of these variables. This can be done in various ways, but one nice one is ggplot. First we prepare the data from df.summarydata that we want to plot.
+Let's first create a bar-plot with the number of species per site, including error bars and sort the bars by the number of species.
+
+We create a new empty variable that will just hold the variables we want to plot. We need the location, num_species.mean and the maximum and minimum values for the error bars. We calculated everything with ```df.summarydata$num_species.mean``` and ```df.summarydata$num_species.sd``` above.
+Lastly we want to sort the plot by the number of species. The order function returns the row order when sorted by a variable, which we use to change the order of the sites in the plotdata.
+```{r prepare_plot_data}
+plotdata = list()
+plotdata$location <- df.summarydata$Group.1
+plotdata$num_species <- df.summarydata$num_species.mean #mean of num_species
+plotdata$num_species_sd_min <- df.summarydata$num_species.mean - df.summarydata$num_species.sd
+plotdata$num_species_sd_max <- df.summarydata$num_species.mean + df.summarydata$num_species.sd
+plotdata$num_nursery_species <- df.summarydata$num_nursery_species.mean #mean of num_species
+plotdata$num_nursery_species_sd_min <- df.summarydata$num_nursery_species.mean - df.summarydata$num_nursery_species.sd
+plotdata$num_nursery_species_sd_max <- df.summarydata$num_nursery_species.mean + df.summarydata$num_nursery_species.sd
+plotdata <- data.frame(plotdata) #ggplot actually needs a dataframe while we created a list. So convert it.
+ordered_x <- as.character(plotdata[order(plotdata$num_species),c("location")])
+plotdata$location <- factor(plotdata$location, levels=ordered_x)
+```
+Next we'll create the plot. There is a lot of good information on ggplot on the internet, but it's also hard to find what you're looking for because there are sooooo many possibilities. A few good pages are http://rforpublichealth.blogspot.com/2014/01/ggplot2-cheatsheet-for-barplots.html, http://www.cookbook-r.com/Manipulating_data/Changing_the_order_of_levels_of_a_factor/ and http://www.r-bloggers.com/building-barplots-with-error-bars/
+```{r create_plot}
+
+#create the plot
+plt.num_species_summary <- ggplot(plotdata, aes(x=location, y=num_species))
+#add the bars
+plt.num_species_summary <- plt.num_species_summary + geom_bar(stat="identity")
+#add the errorbars
+plt.num_species_summary <- plt.num_species_summary + geom_errorbar(aes(ymax = plotdata$num_species_sd_min, ymin = plotdata$num_species_sd_max), width=0.25)
+#show the plot
+plt.num_species_summary
+```
+
+Now let's do the same for the nursery species.
+```{r create_nursery_plot}
+#first we need to re-order the locations according to the number of nursery species.
+ordered_x <- as.character(plotdata[order(plotdata$num_nursery_species),c("location")])
+plotdata$location <- factor(plotdata$location, levels=ordered_x)
+
+plt.num_nursery_species_summary <- ggplot(plotdata, aes(x=location, y=num_nursery_species))
+plt.num_nursery_species_summary <- plt.num_nursery_species_summary + geom_bar(stat="identity")
+plt.num_nursery_species_summary <- plt.num_nursery_species_summary + geom_errorbar(aes(ymax = plotdata$num_nursery_species_sd_min, ymin = plotdata$num_nursery_species_sd_max), width=0.25)
+plt.num_nursery_species_summary
+```
+
+
+## A GLM test
+So now let's do a GLM test. I'll make a small list of species and loop over those to do the same GLM on their abundance for each of them. There are various ways of making a list of species. See the examples below.
+
+```{r prepare_lists}
+#These are all our species:
+df.species_all$colname
+#We can make a list by just typing there names like this:
+my_species <- c("parupeneus_barberinoides","lutjanus_fulviflamma","plectropomus_areolatus","chaetodon_vagabundus")
+#Another option is just to select the first 10 species like this
+my_species <- df.species_all$colname[1:10]
+#Or species 1,5,10,35 and 98
+my_species <- df.species_all$colname[c(1,5,10,35,98)]
+```
+
+We also still need to add out site data (distance to nursery habitat and such) to our ```df.sample_data``` dataframe.
+This will give us a few extra variables still that we can use in our GLM and other analyses. We already saved the site data in the ```df.sites``` data frame, so we can join (merge) that one with the ```df.sample_data``` dataframe by joining on the location names (called location in df.sample_data and name in df.sites).
+```{r join_locations}
+df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
+```
+
+Now lets loop over those species and do a GLM for the abundance of each of them against the distance to seagrass.
+
+We select all data in the species column with ```df.sample_data[,c(sp)]``` and make a formula with that. This formula only tests the abundance of the species agains the distance to seagrass. You can extend the fomula by add multiple variables and also testing the interaction between them. We print the resulting summary. This will tell you the ```Pr(|t|)``` which is the p-value for the specific model parameter.For more information on regression in R see the awesome documentation on http://www.ats.ucla.edu/stat/dae/ and the presentation on http://www.pitt.edu/~njc23/Lecture10.pdf.
+
+Aside from printing the test results, we also need to see if we can actually use our model results. We do this by judging if the residuals of our model are normally distributed (or in other words, only random variation is left), and if the residuals are evenly distributed over the fitted values. You can judge this visually in the following plots.
+```{r glm_loop}
+for (sp in my_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass)
+  print(summary(res))
+  par(mfrow=c(1,2)) #I want these two plots side by side
+  #Make a plot of the fitted values agains the residulas
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( #this tryCatch part is to make sure that the code continues if there is an error with fitting the line below.
+    lines(smooth.spline(fitted(res), residuals(res))), #Add a smoot line that should be horizontal
+    error=function(e){}
+  )
+  #Create a normal q-q plot to see if the residuals are normally distributed
+  qqnorm(res$residuals)
+  qqline(res$residuals) #add the solid line on which all points should be located with a normal distrubution.
+  
+}
+par(mfrow=c(1,1)) #for the next plots, I just want the one at a time again. So restore to the standard setting.
+```
+A binary logistic regression can be done with the same function, but specifying family=logit.
+We first need to select the right column names. the ```df.species_all$colname_pres``` variable contains the column names for the presence/absence data for the species.
+```{r logsitic_regr}
+my_species <- df.species_all$colname_pres[c(1,5,10,35,98)]
+for (sp in my_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass, family="binomial")
+  print(summary(res))
+}
+```
+
+
+## Dirkje prutsels
+
+Nursery species columns: 1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104
+
+# ANOVA
+
+```{r anova}
+  res <- aov(df.sample_data$num_nursery_species ~ df.sample_data$location)
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}
+  )
+  
+    qqnorm(res$residuals)
+  qqline(res$residuals)
+  
+  shapiro.test(res$residuals) #no normal distribution
+  kruskal.test(df.sample_data$num_nursery_species ~ df.sample_data$location) #nonidentical populations
+  
+  dunn.test.control(df.sample_data$num_nursery_species, df.sample_data$location,p.adjust="bonferroni")
+  
+  TukeyHSD(x=res, 'df.sample_data$location', conf.level=0.95)
+  library(agricolae)
+  HSD.test(res,'df.sample_data$location',group=TRUE)
+  
+  
+```
+
+# Logistic regression ; on presence
+
+Seagrass only
+
+```{r logsitic_regr_nurs}
+my_nur_species <- df.species_all$colname_pres[c(1:3)]
+for (sp in my_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass + df.sample_data$size_seagrass, family="binomial")
+  print(summary(res))
+}
+```
+
+Seagrass with mangroves
+
+```{r logsitic_regr_nurs_mangroves}
+for (sp in my_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass + df.sample_data$distance_mangroves + df.sample_data$size_seagrass + df.sample_data$size_mangroves, family="binomial")
+  print(summary(res))
+}
+```
+
+# GLM with selection on presence - family = binomial ; on abundance
+
+Maak selectie op basis van _pres columns
+
+
