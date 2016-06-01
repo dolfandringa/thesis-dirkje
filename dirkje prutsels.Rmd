@@ -124,21 +124,133 @@ Nursery species columns: 1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,10
 #Seagrass only
 
 ```{r logsitic_regr_nurs}
-my_nur_species <- df.species_all$colname_pres[c(1)]
+my_nur_species <- df.species_all$colname_pres[c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)]
 for (sp in my_nur_species){
   print(sp)
   res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass, family="binomial")
-  print(summary(res))
-}
+  print(summary(res)) 
+  
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){} )
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
 ```
 
-#Seagrass with mangroves
+#Seagrass with mpa
 
 ```{r logsitic_regr_nurs_mangroves}
 for (sp in my_nur_species){
   print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$distance_mangroves * df.sample_data$size_seagrass * df.sample_data$size_mangroves, family="binomial")
-  print(summary(res))
-}
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass * df.sample_data$mpa, family="binomial")
+  print(summary(res))  
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}
+  )
+  
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
 ```
 
+#Seagrass - mangroves - mpa
+
+```{r logsitic_regr_nurs_all}
+for (sp in my_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$distance_mangroves * df.sample_data$size_seagrass * df.sample_data$size_mangroves * df.sample_data$mpa, family="binomial")
+  print(summary(res))  
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}
+  )
+  
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```
+
+# GLM - family = Poisson ; on abundance
+
+#Seagrass only
+
+```{r glm_Pois_grass_nur_loop}
+glm_nur_species <- df.species_all$colname[c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)]
+
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}
+  )
+  
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+#Seagrass - mpa
+
+```{r glm_Pois_grass_mpa_nur_loop}
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass * df.sample_data$mpa, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}
+  )
+  
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+#Seagrass - mangroves - mpa
+
+```{r glm_Pois_nur_loop}
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass * df.sample_data$distance_mangroves * df.sample_data$size_mangroves * df.sample_data$mpa, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}
+  )
+  
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+# GLM with selection on presence - family = binomial ; on abundance
+
+Maak selectie op basis van _pres columns
+
+```{r glm_nur_loop}
+glm_select_nur_species <- df.species_all[c(1),c("colname_pres","colname")]
+for (sp in glm_select_nur_species){
+  print(sp$colname)
+  n <- subset(df.sample_data,sp$colname_pres > 0)
+  res <- glm(n[c,(sp$colname)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass * df.sample_data$distance_mangroves * df.sample_data$size_mangroves, family="binomial")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}
+  )
+  
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
