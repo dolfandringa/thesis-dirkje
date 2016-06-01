@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-load('C:\\Users\\Dirkje\\Desktop\\R\\data.RDa') #load the data
+load('data.RDa') #load the data
 library('vegan')
 library('ggplot2')
 library('PMCMR')
