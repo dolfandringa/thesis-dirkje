@@ -31,6 +31,8 @@ df.sample_data$num_nursery_species <- apply(df.sample_data[c(nursery_species$col
 df.sample_data$num_fish <- apply(df.sample_data[c(df.species_all$colname)],MARGIN=1,sum)
 #calculate number of nursery fish
 df.sample_data$num_nursery_fish <- apply(df.sample_data[c(nursery_species$colname)],MARGIN=1,sum)
+
+df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
 ```
 
 ## Nursery species
@@ -125,7 +127,7 @@ Nursery species columns: 1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,10
 my_nur_species <- df.species_all$colname_pres[c(1)]
 for (sp in my_nur_species){
   print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass + df.sample_data$size_seagrass, family="binomial")
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass, family="binomial")
   print(summary(res))
 }
 ```
@@ -135,7 +137,7 @@ for (sp in my_nur_species){
 ```{r logsitic_regr_nurs_mangroves}
 for (sp in my_nur_species){
   print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass + df.sample_data$distance_mangroves + df.sample_data$size_seagrass + df.sample_data$size_mangroves, family="binomial")
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$distance_mangroves * df.sample_data$size_seagrass * df.sample_data$size_mangroves, family="binomial")
   print(summary(res))
 }
 ```
