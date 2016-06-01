@@ -1,0 +1,142 @@
+---
+title: "Dirkje prutsels"
+author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
+date: "28 May 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+load('C:\\Users\\Dirkje\\Desktop\\R\\data.RDa') #load the data
+library('vegan')
+library('ggplot2')
+library('PMCMR')
+nursery_species <- subset(df.species_all, df.species_all$nursery) 
+```
+
+## Calculate some info per sample
+
+```{r calculation}
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for all species
+df.sample_data$diversity <- apply(df.sample_data[df.species_all$colname], MARGIN=1, diversity)
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for nursery species
+df.sample_data$nursery_diversity <- apply(df.sample_data[nursery_species$colname], MARGIN=1, diversity)
+
+#calculate number of species for all species by summing the presence/absence columns for those species
+df.sample_data$num_species <- apply(df.sample_data[c(df.species_all$colname_pres)],MARGIN=1,sum)
+#calculate number of species for nursery species by summing the presence/absence columns for those species
+df.sample_data$num_nursery_species <- apply(df.sample_data[c(nursery_species$colname_pres)],MARGIN=1,sum)
+
+#calculate number of fish
+df.sample_data$num_fish <- apply(df.sample_data[c(df.species_all$colname)],MARGIN=1,sum)
+#calculate number of nursery fish
+df.sample_data$num_nursery_fish <- apply(df.sample_data[c(nursery_species$colname)],MARGIN=1,sum)
+```
+
+## Nursery species
+Create a subset of the data for only the nursery species by creating a list of columns to include, and then making a new dataframe with only those colunms.
+
+```{r subset_nursery_species}
+nursery_columns <- c(c("location","depth","transect","date","nursery_diversity","num_nursery_species","num_nursery_fish"),nursery_species$colname, nursery_species$colname_pres) #columns for nursery species analysis
+df.nursery_sample_data <- df.sample_data[nursery_columns] # subset of the data with only the nursery species
+```
+
+## Summary
+
+It is good to first have a summary of your data frame to see if there are any strange things showing up (NA values, values that are too high/low, etc).
+
+```{r summary}
+summary(df.sample_data[c("location","depth","transect","date","diversity","num_species","num_fish")])
+summary(df.nursery_sample_data[c("location","depth","transect","date","nursery_diversity","num_nursery_species","num_nursery_fish")])
+```
+## Statistics per site
+We want to see some data per site with mean, standard deviation, number of rows (n) and sum of the number of species and diversity of both all species and the nursery species.
+
+The aggregate function calculates aggregate values. Here we select first only a number of columns that we want to have aggregate statistics on by specifying ```c('num_species','diversity','num_nursery_species','nursery_diversity')```
+Then we select what we want to aggregate these variables by with ```by=list(df.sample_data$location)```.
+Lastly we tell the aggregate function how to aggregate the data. We make a very simple that calculates and returns the mean, sum, sd (standard deviation) and number of values.
+Everything is stored in df.summarydata.
+```{r summary_per_site}
+df.summarydata <- aggregate(df.sample_data[c('num_species','diversity','num_nursery_species','nursery_diversity')], by=list(df.sample_data$location), FUN=function(x) c(mean=mean(x), sum=sum(x),sd=sd(x),n=length(x)))
+df.summarydata <- do.call(data.frame, df.summarydata)
+```
+This is the result.
+```{r display_summary_per_site, warning=FALSE, message=FALSE, echo=FALSE, eval=TRUE}
+knitr::kable(df.summarydata)
+```
+
+## Dirkje prutsels
+
+```{r display_data, message=FALSE, echo=FALSE, eval=TRUE}
+knitr::kable(df.sites)
+```
+
+Nursery species columns: 1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104
+
+# ANOVA
+
+```{r anova}
+  res <- aov(df.sample_data$num_nursery_species ~ df.sample_data$location)
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+  qqnorm(res$residuals)
+  qqline(res$residuals)
+  
+  shapiro.test(res$residuals) #no normal distribution
+  
+    #square root used for count data; whereas log is used for size data
+  res_sqrt <- aov(sqrt(df.sample_data$num_nursery_species) ~ df.sample_data$location)
+  print(summary(res_sqrt))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res_sqrt),residuals(res_sqrt),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res_sqrt), residuals(res_sqrt))), 
+    error=function(e){})
+  qqnorm(res_sqrt$residuals)
+  qqline(res_sqrt$residuals)
+  
+  shapiro.test(res_sqrt$residuals) #even less normal distributed
+  
+  TukeyHSD(x=res, 'df.sample_data$location', conf.level=0.95) #not allowed to use, since data is not normal distributed
+  
+  #Therefore:
+  kruskal.test(df.sample_data$num_nursery_species ~ df.sample_data$location) #nonidentical populations
+  t <- dunn.test::dunn.test(df.sample_data$num_nursery_species, df.sample_data$location,method="bonferroni")
+  tab <- list()
+  tab$z <- t$Z
+  tab$padjusted <- t$P.adjusted
+  tab <- data.frame(tab)
+  rownames(tab) <- t$comparisons
+  tab <- tab[order(tab$padjusted),]
+  knitr::kable(tab)
+  
+  
+```
+
+# Logistic regression ; on presence
+
+#Seagrass only
+
+```{r logsitic_regr_nurs}
+my_nur_species <- df.species_all$colname_pres[c(1)]
+for (sp in my_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass + df.sample_data$size_seagrass, family="binomial")
+  print(summary(res))
+}
+```
+
+#Seagrass with mangroves
+
+```{r logsitic_regr_nurs_mangroves}
+for (sp in my_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass + df.sample_data$distance_mangroves + df.sample_data$size_seagrass + df.sample_data$size_mangroves, family="binomial")
+  print(summary(res))
+}
+```
+

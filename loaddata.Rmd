@@ -18,10 +18,10 @@ library(plyr)
 ```
 Read the spreadsheets (open document spreadsheet) and make a copy that we can use for processing the data.
 ```{r readfile}
-df.raw <- read_ods(path='../Data_Surveys_dirkje.ods',sheet=2,col_types = c(text,numeric,numeric,numeric,numeric,numeric,numeric,numeric,numeric,date))
-df.species <- as.data.frame(read_ods(path='../indicator_species2.ods',sheet=1,col_types = c(text,text)))
-df.species_dirkje_only <- as.data.frame(read_ods(path='../indicator_species2.ods',sheet=2,col_types = c(text,text)))
-df.species_nursery <- as.data.frame(read_ods(path='../indicator_species2.ods',sheet=3,col_types = c(text,text)))
+df.raw <- read_ods(path='C:\\Users\\Dirkje\\Desktop\\R\\Data_Surveys_dirkje.ods',sheet=2,col_types = c(text,numeric,numeric,numeric,numeric,numeric,numeric,numeric,numeric,date))
+df.species <- as.data.frame(read_ods(path='C:\\Users\\Dirkje\\Desktop\\R\\indicator_species2.ods',sheet=1,col_types = c(text,text)))
+df.species_dirkje_only <- as.data.frame(read_ods(path='C:\\Users\\Dirkje\\Desktop\\R\\indicator_species2.ods',sheet=2,col_types = c(text,text)))
+df.species_nursery <- as.data.frame(read_ods(path='C:\\Users\\Dirkje\\Desktop\\R\\indicator_species2.ods',sheet=3,col_types = c(text,text)))
 df.species_all <- rbind(df.species, df.species_dirkje_only)
 df.species_all$nursery <- str_to_lower(df.species_all$scientific_name) %in% str_to_lower(df.species_nursery$scientific_name)
 df.processed <- df.raw
@@ -157,5 +157,5 @@ knitr::kable(df.sample_data)
 
 ## Save the data in a file that we can import in different R analyses.
 ```{r save}
-save(df.raw,df.processed,df.sample_data,df.species_all,df.sites,list=c("df.raw","df.processed","df.sample_data","df.species_all","df.sites"), file="data.RDa")
+save(df.raw,df.processed,df.sample_data,df.species_all,df.sites,list=c("df.raw","df.processed","df.sample_data","df.species_all","df.sites"), file="C:\\Users\\Dirkje\\Desktop\\R\\data.RDa")
 ```
