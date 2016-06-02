@@ -36,6 +36,7 @@ df.sites$size_seagrass <- c(0.15,1.83,0.65,0.01,3.89,15.34,15.18,0.05,0.13)
 df.sites$distance_mangroves <- sample(1:1000, 9)
 df.sites$size_mangroves <- sample(1:400, 9)
 df.sites$mpa <- c('non-mpa','non-mpa','non-mpa','mpa','mpa','mpa','non-mpa','non-mpa','mpa')
+df.sites$north <- c('south','north','north','south','north','south','south','south','north')
 df.sites <- data.frame(df.sites)
 
 #we also want nice names for the observers and depths.
