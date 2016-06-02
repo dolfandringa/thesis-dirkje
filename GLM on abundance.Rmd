@@ -1,0 +1,304 @@
+---
+title: "GLM on abundance"
+author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
+date: "02 June 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+load('data.RDa') #load the data
+library('vegan')
+library('ggplot2')
+library('PMCMR')
+nursery_species <- subset(df.species_all, df.species_all$nursery) 
+```
+
+## Calculate some info per sample
+
+```{r calculation}
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for all species
+df.sample_data$diversity <- apply(df.sample_data[df.species_all$colname], MARGIN=1, diversity)
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for nursery species
+df.sample_data$nursery_diversity <- apply(df.sample_data[nursery_species$colname], MARGIN=1, diversity)
+
+#calculate number of species for all species by summing the presence/absence columns for those species
+df.sample_data$num_species <- apply(df.sample_data[c(df.species_all$colname_pres)],MARGIN=1,sum)
+#calculate number of species for nursery species by summing the presence/absence columns for those species
+df.sample_data$num_nursery_species <- apply(df.sample_data[c(nursery_species$colname_pres)],MARGIN=1,sum)
+
+#calculate number of fish
+df.sample_data$num_fish <- apply(df.sample_data[c(df.species_all$colname)],MARGIN=1,sum)
+#calculate number of nursery fish
+df.sample_data$num_nursery_fish <- apply(df.sample_data[c(nursery_species$colname)],MARGIN=1,sum)
+
+df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
+```
+
+## Nursery species
+
+```{r subset_nursery_species}
+nursery_columns <- c(c("location","depth","transect","date","nursery_diversity","num_nursery_species","num_nursery_fish"),nursery_species$colname, nursery_species$colname_pres) #columns for nursery species analysis
+df.nursery_sample_data <- df.sample_data[nursery_columns] # subset of the data with only the nursery species
+```
+
+##GLM on abundance
+
+Independent variables: size_seagrass, distance_seagrass, mpa, depth, north
+
+```{r glm_Pois_nur_loop}
+glm_nur_species <- df.species_all$colname[c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)]
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) 
+  }
+```  
+
+##log seagrass
+
+log(size_seagrass)
+
+```{r glm_Pois_Lsize_nur_loop}
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * (log(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+log(distance_seagrass)
+
+```{r glm_Pois_Ldistance_nur_loop}
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ (log(df.sample_data$distance_seagrass)) * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+log(size_seagrass) & log(distance_seagrass)
+
+```{r glm_Pois_Lsize-distance_nur_loop}
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ (log(df.sample_data$distance_seagrass)) * (log(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+##log10
+
+log10(size_seagrass)
+
+```{r glm_Pois_L10size_nur_loop}
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * (log10(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+log10(distance_seagrass)
+
+```{r glm_Pois_L10distance_nur_loop}
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ (log10(df.sample_data$distance_seagrass)) * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+log10(size_seagrass) & log10(distance_seagrass)
+
+```{r glm_Pois_L10size-distance_nur_loop}
+for (sp in glm_nur_species){
+  print(sp)
+  res <- glm(df.sample_data[,c(sp)] ~ (log10(df.sample_data$distance_seagrass)) * (log10(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+## log and log10 on abundance
+
+log/log10 on abundance can not be performed since it results in negative values
+
+Error in eval(expr, envir, enclos) : 
+  negative values not allowed for the 'Poisson' family 
+
+## GLM with selection on presence; on abundance
+
+Maak selectie op basis van _pres columns
+
+```{r glm_nur_loop}
+
+speciesrows <- c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  res <- glm(n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$mpa * n$depth * n$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+    qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+## log
+
+log(size)
+
+```{r glm_nur_Lsize_loop}
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  res <- glm(n[,c(sp$colname)] ~ n$distance_seagrass * (log(n$size_seagrass)) * n$mpa * n$depth * n$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+    qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+log(distance)
+
+```{r glm_nur_Ldist_loop}
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  res <- glm(n[,c(sp$colname)] ~ (log(n$distance_seagrass)) * n$size_seagrass* n$mpa * n$depth * n$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+    qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+log(size) & log (distance)
+
+```{r glm_nur_Lsize-dsit_loop}
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  res <- glm(n[,c(sp$colname)] ~ (log(n$distance_seagrass)) * (log(n$size_seagrass)) * n$mpa * n$depth * n$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+    qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+## log10
+
+log10(size)
+
+```{r glm_nur_L10size_loop}
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  res <- glm(n[,c(sp$colname)] ~ n$distance_seagrass * (log10(n$size_seagrass)) * n$mpa * n$depth * n$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+    qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+log10(distance)
+
+```{r glm_nur_L10dist_loop}
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  res <- glm(n[,c(sp$colname)] ~ (log10(n$distance_seagrass)) * n$size_seagrass* n$mpa * n$depth * n$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+    qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+log10(size) & log10(distance)
+
+```{r glm_nur_L10size-dsit_loop}
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  res <- glm(n[,c(sp$colname)] ~ (log10(n$distance_seagrass)) * (log10(n$size_seagrass)) * n$mpa * n$depth * n$north, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+    qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
