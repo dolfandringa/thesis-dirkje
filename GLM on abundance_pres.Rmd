@@ -1,5 +1,5 @@
 ---
-title: "GLM on abundance"
+title: "GLM on abundance_pres"
 author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
 date: "02 June 2016"
 output: html_document
@@ -42,21 +42,74 @@ nursery_columns <- c(c("location","depth","transect","date","nursery_diversity",
 df.nursery_sample_data <- df.sample_data[nursery_columns] # subset of the data with only the nursery species
 ```
 
-##GLM family=Poisson on abundance
+##GLM on abundance_pres
+
+```{r glm_nur_ab_pres_loop}
+
+speciesrows <- c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  if(nrow(n)<5){
+    print("Less than 5 rows remaining in subset")
+    next
+  }
+  if(length(unique(n$depth))==1 & length(unique(n$mpa))>1){
+    formula <- n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$mpa * n$north
+  }
+  else if (length(unique(n$depth))>1 & length(unique(n$mpa))==1){
+    formula <- n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$depth * n$north  
+  }
+  else if (length(unique(n$depth))==1 & length(unique(n$mpa))==1){
+    formula <- n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$north  
+  }
+  else{
+    formula <- n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$mpa * n$depth * n$north  
+  }
+  print(paste("Formula",sp,":",formula))
+  res <- glm(formula, family="poisson")
+  print(summary(res))
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch( 
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){})
+    qqnorm(res$residuals)
+  qqline(res$residuals) }
+```  
+
+##GLM family=Poisson on abundance_pres
 
 Independent variables: size_seagrass, distance_seagrass, mpa, depth, north
 
-```{r glm_Pois_nur_loop}
+```{r glm_Pois_nur_loop} 
 
-glm_tab <- data.frame(species=c(), coefficient=c(), pvalue=c())
-
-glm_nur_species <- df.species_all$colname[c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)]
-for (sp in glm_nur_species){
-  print(sp)
-
-  res <- NULL
+speciesrows <- c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)
+for (spnum in speciesrows){
+  sp <- df.species_all[spnum,]
+  print(sp$colname)
+  n <- subset(df.sample_data, df.sample_data[c(sp$colname_pres)] > 0)
+  if(nrow(n)<5){
+    print("Less than 5 rows remaining in subset")
+    next
+  }
+  if(length(unique(n$depth))==1 & length(unique(n$mpa))>1){
+    formula <- n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$mpa * n$north
+  }
+  else if (length(unique(n$depth))>1 & length(unique(n$mpa))==1){
+    formula <- n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$depth * n$north  
+  }
+  else if (length(unique(n$depth))==1 & length(unique(n$mpa))==1){
+    formula <- n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$north  
+  }
+  else{
+    formula <- n[,c(sp$colname)] ~ n$distance_seagrass * n$size_seagrass * n$mpa * n$depth * n$north  
+  }
+  print(paste("Formula",sp,":",formula))
+    res <- NULL
   tryCatch(
-    res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="poisson"),
+  res <- glm(formula, family="poisson"),
     error=function(e){ print("GLM kon niet uitgevoerd worden.");print(geterrmessage())}
   )
   if(is.null(res)){
@@ -82,6 +135,16 @@ for (sp in glm_nur_species){
   qqline(res$residuals) 
 }
 ```
+
+[1] "abudefduf_vaigiensis"
+[1] "Formula Abudefduf vaigiensis : ~"                                                                     
+[2] "Formula Indo-Pacific Sergeant : n[, c(sp$colname)]"                                                   
+[3] "Formula TRUE : n$distance_seagrass * n$size_seagrass * n$mpa * n$depth * n$north"                     
+[4] "Formula indopacificsergeant : ~"                                                                      
+[5] "Formula abudefduf_vaigiensis : n[, c(sp$colname)]"                                                    
+[6] "Formula abudefduf_vaigiensis_pres : n$distance_seagrass * n$size_seagrass * n$mpa * n$depth * n$north"
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
 
 ```{r glm_Pois_nur_loop_table}
 knitr::kable(glm_tab, escape=TRUE)
@@ -382,4 +445,4 @@ for (sp in glm_nur_species){
 
 ```{r glm_Labun-size-distance_nur_loop_table}
 knitr::kable(glm_tab, escape=TRUE)
-``` 
+```

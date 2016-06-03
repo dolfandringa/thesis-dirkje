@@ -1,0 +1,56 @@
+---
+title: "Density"
+author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
+date: "02 June 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+load('data.RDa') #load the data
+library('vegan')
+library('ggplot2')
+library('PMCMR')
+nursery_species <- subset(df.species_all, df.species_all$nursery) 
+```
+
+## Calculate some info per sample
+
+```{r calculation}
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for all species
+df.sample_data$diversity <- apply(df.sample_data[df.species_all$colname], MARGIN=1, diversity)
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for nursery species
+df.sample_data$nursery_diversity <- apply(df.sample_data[nursery_species$colname], MARGIN=1, diversity)
+
+#calculate number of species for all species by summing the presence/absence columns for those species
+df.sample_data$num_species <- apply(df.sample_data[c(df.species_all$colname_pres)],MARGIN=1,sum)
+#calculate number of species for nursery species by summing the presence/absence columns for those species
+df.sample_data$num_nursery_species <- apply(df.sample_data[c(nursery_species$colname_pres)],MARGIN=1,sum)
+
+#calculate number of fish
+df.sample_data$num_fish <- apply(df.sample_data[c(df.species_all$colname)],MARGIN=1,sum)
+#calculate number of nursery fish
+df.sample_data$num_nursery_fish <- apply(df.sample_data[c(nursery_species$colname)],MARGIN=1,sum)
+
+df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
+```
+
+## Calculate diversity and number of nursrey fish species
+
+```{r calculation}
+sign_species <- c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for nursery species
+df.sample_data$nursery_diversity <- apply(df.sample_data[nursery_species$colname], MARGIN=1, diversity)
+
+#calculate number of species for all species by summing the presence/absence columns for those species
+df.sample_data$num_species <- apply(df.sample_data[c(df.species_all$colname_pres)],MARGIN=1,sum)
+#calculate number of species for nursery species by summing the presence/absence columns for those species
+df.sample_data$num_nursery_species <- apply(df.sample_data[c(nursery_species$colname_pres)],MARGIN=1,sum)
+
+#calculate number of fish
+df.sample_data$num_fish <- apply(df.sample_data[c(df.species_all$colname)],MARGIN=1,sum)
+#calculate number of nursery fish
+df.sample_data$num_nursery_fish <- apply(df.sample_data[c(nursery_species$colname)],MARGIN=1,sum)
+
+df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
+```

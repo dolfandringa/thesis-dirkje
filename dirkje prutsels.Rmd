@@ -121,119 +121,164 @@ Nursery species columns: 1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,10
 
 Independent variables: size_seagrass, distance_seagrass, mpa, depth, north
 
-```{r logistic_nurs}
+```{r logist_nurs}
+glm_tab <- data.frame(species=c(), coefficient=c(), pvalue=c())
 my_nur_species <- df.species_all$colname_pres[c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)]
 
 for (sp in my_nur_species){
   print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial")
-  print(summary(res))  
+res <- NULL
+  tryCatch(
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial"),
+    error=function(e){ print("GLM kon niet uitgevoerd worden.");print(geterrmessage())}
+  )
+  if(is.null(res)){
+    next
+  }
+  
+  coefs <- as.data.frame(coef(summary(res)))
+  coefs <- subset(coefs,coefs$`Pr(>|z|)`<=0.05)
+  coefs <- data.frame(species=rep(sp,nrow(coefs)),coefficient=rownames(coefs),pvalue=coefs$`Pr(>|z|)`)
+  coefs <- subset(coefs, coefs$coefficient != '(Intercept)')
+  glm_tab <- rbind(glm_tab, coefs)
+  if(nrow(coefs)==0){
+    next
+  }
+  print(paste("AIC",sp,": ",summary(res)$aic))
   par(mfrow=c(1,2)) 
   plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  title(sp)
   tryCatch( 
     lines(smooth.spline(fitted(res), residuals(res))), 
     error=function(e){}  )
   qqnorm(res$residuals)
-  qqline(res$residuals) }
+  qqline(res$residuals) 
+}
 ```
 
-##log
+```{r logis_nur_loop_table}
+knitr::kable(glm_tab, escape=TRUE)
+```  
 
 log(size_seagrass)
 
-```{r logistic_Lsize_nurs}
+```{r logist_nurs_Lsize}
+glm_tab <- data.frame(species=c(), coefficient=c(), pvalue=c())
+my_nur_species <- df.species_all$colname_pres[c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)]
+
 for (sp in my_nur_species){
   print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * (log(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial")
-  print(summary(res))  
+res <- NULL
+  tryCatch(
+  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * (log(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial"),
+    error=function(e){ print("GLM kon niet uitgevoerd worden.");print(geterrmessage())}
+  )
+  if(is.null(res)){
+    next
+  }
+  
+  coefs <- as.data.frame(coef(summary(res)))
+  coefs <- subset(coefs,coefs$`Pr(>|z|)`<=0.05)
+  coefs <- data.frame(species=rep(sp,nrow(coefs)),coefficient=rownames(coefs),pvalue=coefs$`Pr(>|z|)`)
+  coefs <- subset(coefs, coefs$coefficient != '(Intercept)')
+  glm_tab <- rbind(glm_tab, coefs)
+  if(nrow(coefs)==0){
+    next
+  }
+  print(paste("AIC",sp,": ",summary(res)$aic))
   par(mfrow=c(1,2)) 
   plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  title(sp)
   tryCatch( 
     lines(smooth.spline(fitted(res), residuals(res))), 
     error=function(e){}  )
   qqnorm(res$residuals)
-  qqline(res$residuals) }
+  qqline(res$residuals) 
+}
 ```
+
+```{r logis_nur_Lsize_loop_table}
+knitr::kable(glm_tab, escape=TRUE)
+```  
 
 log(distance_seagrass)
 
-```{r logistic_Ldistance_nurs}
+```{r logist_nurs_Ldist}
+glm_tab <- data.frame(species=c(), coefficient=c(), pvalue=c())
+my_nur_species <- df.species_all$colname_pres[c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)]
+
 for (sp in my_nur_species){
   print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ (log(df.sample_data$distance_seagrass)) * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial")
-  print(summary(res))  
+res <- NULL
+  tryCatch(
+  res <- glm(df.sample_data[,c(sp)] ~ (log(df.sample_data$distance_seagrass)) * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial"),
+    error=function(e){ print("GLM kon niet uitgevoerd worden.");print(geterrmessage())}
+  )
+  if(is.null(res)){
+    next
+  }
+  
+  coefs <- as.data.frame(coef(summary(res)))
+  coefs <- subset(coefs,coefs$`Pr(>|z|)`<=0.05)
+  coefs <- data.frame(species=rep(sp,nrow(coefs)),coefficient=rownames(coefs),pvalue=coefs$`Pr(>|z|)`)
+  coefs <- subset(coefs, coefs$coefficient != '(Intercept)')
+  glm_tab <- rbind(glm_tab, coefs)
+  if(nrow(coefs)==0){
+    next
+  }
+  print(paste("AIC",sp,": ",summary(res)$aic))
   par(mfrow=c(1,2)) 
   plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  title(sp)
   tryCatch( 
     lines(smooth.spline(fitted(res), residuals(res))), 
-    error=function(e){} )
+    error=function(e){}  )
   qqnorm(res$residuals)
-  qqline(res$residuals) }
+  qqline(res$residuals) 
+}
 ```
+
+```{r logis_nur_Ldist_loop_table}
+knitr::kable(glm_tab, escape=TRUE)
+```  
 
 log(distance_seagrass) & log(size_seagrass)
 
-```{r logistic_Lsize-distance_nurs}
+```{r logist_Lsize-distnurs}
+glm_tab <- data.frame(species=c(), coefficient=c(), pvalue=c())
+my_nur_species <- df.species_all$colname_pres[c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)]
+
 for (sp in my_nur_species){
   print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ (log(df.sample_data$distance_seagrass)) * (log(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial")
-  print(summary(res))  
+res <- NULL
+  tryCatch(
+  res <- glm(df.sample_data[,c(sp)] ~ (log(df.sample_data$distance_seagrass)) * (log(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial"),
+    error=function(e){ print("GLM kon niet uitgevoerd worden.");print(geterrmessage())}
+  )
+  if(is.null(res)){
+    next
+  }
+  
+  coefs <- as.data.frame(coef(summary(res)))
+  coefs <- subset(coefs,coefs$`Pr(>|z|)`<=0.05)
+  coefs <- data.frame(species=rep(sp,nrow(coefs)),coefficient=rownames(coefs),pvalue=coefs$`Pr(>|z|)`)
+  coefs <- subset(coefs, coefs$coefficient != '(Intercept)')
+  glm_tab <- rbind(glm_tab, coefs)
+  if(nrow(coefs)==0){
+    next
+  }
+  print(paste("AIC",sp,": ",summary(res)$aic))
   par(mfrow=c(1,2)) 
   plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  title(sp)
   tryCatch( 
     lines(smooth.spline(fitted(res), residuals(res))), 
     error=function(e){}  )
   qqnorm(res$residuals)
-  qqline(res$residuals) }
+  qqline(res$residuals) 
+}
 ```
 
-##log10
-
-log10(size_seagrass)
-
-```{r logistic_L10size_nurs}
-for (sp in my_nur_species){
-  print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ df.sample_data$distance_seagrass * (log10(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial")
-  print(summary(res))  
-  par(mfrow=c(1,2)) 
-  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
-  tryCatch( 
-    lines(smooth.spline(fitted(res), residuals(res))), 
-    error=function(e){} )
-  qqnorm(res$residuals)
-  qqline(res$residuals) }
-```
-
-log10(distance_seagrass)
-
-```{r logistic_L10distance_nurs}
-for (sp in my_nur_species){
-  print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ (log10(df.sample_data$distance_seagrass)) * df.sample_data$size_seagrass * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial")
-  print(summary(res))  
-  par(mfrow=c(1,2)) 
-  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
-  tryCatch( 
-    lines(smooth.spline(fitted(res), residuals(res))), 
-    error=function(e){}  )
-  qqnorm(res$residuals)
-  qqline(res$residuals) }
-```
-
-log10(distance_seagrass) & log10(size_seagrass)
-
-```{r logistic_L10size-distance_nurs}
-for (sp in my_nur_species){
-  print(sp)
-  res <- glm(df.sample_data[,c(sp)] ~ (log10(df.sample_data$distance_seagrass)) * (log10(df.sample_data$size_seagrass)) * df.sample_data$mpa * df.sample_data$depth * df.sample_data$north, family="binomial")
-  print(summary(res))  
-  par(mfrow=c(1,2)) 
-  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
-  tryCatch( 
-    lines(smooth.spline(fitted(res), residuals(res))), 
-    error=function(e){}  )
-  qqnorm(res$residuals)
-  qqline(res$residuals) }
-```
-
+```{r logis_nur_Lsize-dist_loop_table}
+knitr::kable(glm_tab, escape=TRUE)
+```  
