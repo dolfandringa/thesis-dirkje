@@ -1,7 +1,7 @@
 ---
-title: "Density"
+title: "Density and number significant nursery species"
 author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
-date: "02 June 2016"
+date: "03 June 2016"
 output: html_document
 ---
 
@@ -12,6 +12,7 @@ library('vegan')
 library('ggplot2')
 library('PMCMR')
 nursery_species <- subset(df.species_all, df.species_all$nursery) 
+attach(df.sample_data)
 ```
 
 ## Calculate some info per sample
@@ -35,22 +36,70 @@ df.sample_data$num_nursery_fish <- apply(df.sample_data[c(nursery_species$colnam
 df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
 ```
 
-## Calculate diversity and number of nursrey fish species
-
-```{r calculation}
-sign_species <- c(1:3,25:28,36,39,40,42,47,52:54,58,66,84:86,88,91:100,102:104)
-#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for nursery species
-df.sample_data$nursery_diversity <- apply(df.sample_data[nursery_species$colname], MARGIN=1, diversity)
-
-#calculate number of species for all species by summing the presence/absence columns for those species
-df.sample_data$num_species <- apply(df.sample_data[c(df.species_all$colname_pres)],MARGIN=1,sum)
-#calculate number of species for nursery species by summing the presence/absence columns for those species
-df.sample_data$num_nursery_species <- apply(df.sample_data[c(nursery_species$colname_pres)],MARGIN=1,sum)
-
-#calculate number of fish
-df.sample_data$num_fish <- apply(df.sample_data[c(df.species_all$colname)],MARGIN=1,sum)
-#calculate number of nursery fish
-df.sample_data$num_nursery_fish <- apply(df.sample_data[c(nursery_species$colname)],MARGIN=1,sum)
-
-df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
+```{r subset_nursery_species}
+nursery_columns <- c(c("location","depth","transect","date","nursery_diversity","num_nursery_species","num_nursery_fish"),nursery_species$colname, nursery_species$colname_pres) #columns for nursery species analysis
+df.nursery_sample_data <- df.sample_data[nursery_columns] # subset of the data with only the nursery species
 ```
+
+## Calculate diversity and number of nursery fish species
+
+```{r diversity_sign_species}
+
+sig_species <-df.species_all[c(2,40,52,54,58,88,97,103),]
+
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for SIGNIFICANT nursery species
+df.sample_data$sig_nurs_diversity <- apply(df.sample_data[sig_species$colname], MARGIN=1, diversity)
+
+#calculate the number of nursery fish species
+df.sample_data$sig_nurs_species <- apply(df.sample_data[c(sig_species$colname_pres)],MARGIN=1,sum)
+
+#calculate number of SIGNFICANT nursery fish
+df.sample_data$sig_nurs_num <- apply(df.sample_data[sig_species$colname], MARGIN=1, sum)
+```
+
+```{r summary_per_site}
+df.summarydata <- aggregate(df.sample_data[c('sig_nurs_num','sig_nurs_diversity','sig_nurs_species')], by=list(df.sample_data$location), FUN=function(x) c(mean=mean(x), sum=sum(x),sd=sd(x),n=length(x)))
+df.summarydata <- do.call(data.frame, df.summarydata)
+```
+This is the result per significant nursery species
+```{r display_summary_per_site, warning=FALSE, message=FALSE, echo=FALSE, eval=TRUE}
+knitr::kable(df.summarydata)
+```
+
+##GLM on diversity of nursery fish species (log(size) & log(distance))
+
+Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
+
+```{r glm_div_loop}
+  res <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * mpa * depth * north, data = df.sample_data)
+
+  summary(res)
+
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch(
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) 
+
+```
+
+
+##GLM on number of nursery fish species
+
+```{r glm_sp_loop}
+  res <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * mpa * depth * north, data= df.sample_data)
+  
+  summary(res)
+  
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch(
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) 
+
+```
+
