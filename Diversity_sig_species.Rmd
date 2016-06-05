@@ -11,6 +11,7 @@ load('data.RDa') #load the data
 library('vegan')
 library('ggplot2')
 library('PMCMR')
+library('lmtest')
 nursery_species <- subset(df.species_all, df.species_all$nursery) 
 attach(df.sample_data)
 ```
@@ -85,6 +86,13 @@ Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
 
 ```
 
+``` {r likelihood_diversity}
+  model1 <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * mpa * depth * north, data = df.sample_data)
+  model2 <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * mpa * north, data = df.sample_data)
+  lrtest(model1, model2)
+  #>0.05 = model 2 predicts data significantly better than model 1 {eliminate variabele with highest p-value}
+  #<0.05 = model 2 predicts data significantly less than model 1 {end result}
+```
 
 ##GLM on number of nursery fish species
 
@@ -103,3 +111,10 @@ Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
 
 ```
 
+``` {r likelihood_species}
+  model1 <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * mpa * depth * north, data = df.sample_data)
+  model2 <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * mpa * north, data = df.sample_data)
+  lrtest(model1, model2)
+  #>0.05 = model 2 predicts data significantly better than model 1 {eliminate variabele with highest p-value}
+  #<0.05 = model 2 predicts data significantly less than model 1 {end result}
+```
