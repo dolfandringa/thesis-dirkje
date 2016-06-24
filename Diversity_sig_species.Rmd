@@ -46,7 +46,7 @@ df.nursery_sample_data <- df.sample_data[nursery_columns] # subset of the data w
 
 ```{r diversity_sign_species}
 
-sig_species <-df.species_all[c(2,40,52,54,58,88,97,103),]
+sig_species <-df.species_all[c(2,25,28,36,39,40,42,47,52,53,54,58,66,88,94,95,96,97,98,99,102,103,104),]
 
 #calculate the Shannon-Wiener diversity (with diversity function from vegan package) for SIGNIFICANT nursery species
 df.sample_data$sig_nurs_diversity <- apply(df.sample_data[sig_species$colname], MARGIN=1, diversity)
@@ -72,7 +72,7 @@ knitr::kable(df.summarydata)
 Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
 
 ```{r glm_div_loop}
-  res <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * mpa * depth * north, data = df.sample_data)
+  res <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * depth * north, data = df.sample_data)
 
   summary(res)
 
@@ -87,8 +87,8 @@ Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
 ```
 
 ``` {r likelihood_diversity}
-  model1 <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * mpa * depth * north, data = df.sample_data)
-  model2 <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * mpa * north, data = df.sample_data)
+  model1 <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * depth * north, data = df.sample_data)
+  model2 <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * north, data = df.sample_data)
   lrtest(model1, model2)
   #>0.05 = model 2 predicts data significantly better than model 1 {eliminate variabele with highest p-value}
   #<0.05 = model 2 predicts data significantly less than model 1 {end result}
@@ -97,7 +97,7 @@ Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
 ##GLM on number of nursery fish species
 
 ```{r glm_sp_loop}
-  res <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * mpa * depth * north, data= df.sample_data)
+  res <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * depth * north, data= df.sample_data)
   
   summary(res)
   
@@ -112,8 +112,8 @@ Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
 ```
 
 ``` {r likelihood_species}
-  model1 <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * mpa * depth * north, data = df.sample_data)
-  model2 <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * mpa * north, data = df.sample_data)
+  model1 <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * depth * north, data = df.sample_data)
+  model2 <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * north, data = df.sample_data)
   lrtest(model1, model2)
   #>0.05 = model 2 predicts data significantly better than model 1 {eliminate variabele with highest p-value}
   #<0.05 = model 2 predicts data significantly less than model 1 {end result}
