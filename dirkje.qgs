@@ -18,15 +18,27 @@
     <layer-tree-layer expanded="1" checked="Qt::Checked" id="OSM_Mapnik20160624125602759" name="OSM Mapnik">
       <customproperties/>
     </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="OSM_TF_Landscape20160625105549491" name="OSM TF Landscape">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="OSM_TF_Outdoors20160625105627819" name="OSM TF Outdoors">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="NASA_Fires___Past_24_hours20160625110132386" name="NASA Fires - Past 24 hours">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="Landsat__Gis_Lab_info_20160625110141211" name="Landsat (Gis-Lab.info)">
+      <customproperties/>
+    </layer-tree-layer>
   </layer-tree-group>
   <relations/>
   <mapcanvas>
     <units>meters</units>
     <extent>
-      <xmin>512538.24564565136097372</xmin>
-      <ymin>1001010.51101482391823083</ymin>
-      <xmax>538780.07148172450251877</xmax>
-      <ymax>1017361.39330287755001336</ymax>
+      <xmin>511209.54560331848915666</xmin>
+      <ymin>1000013.98598307417705655</ymin>
+      <xmax>537451.37143939163070172</xmax>
+      <ymax>1016364.86827112780883908</ymax>
     </extent>
     <rotation>0</rotation>
     <projections>1</projections>
@@ -44,12 +56,16 @@
     </destinationsrs>
     <rendermaptile>0</rendermaptile>
     <layer_coordinate_transform_info>
+      <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="Landsat__Gis_Lab_info_20160625110141211"/>
       <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="OSM_Mapnik20160624125602759"/>
       <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="Google_Satellite_WMS20160531025615862"/>
       <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="OSM_Mapnik20160624124645270"/>
       <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:32651" srcDatumTransform="-1" destDatumTransform="-1" layerid="coastal_ecosystems20160624122548878"/>
+      <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="OSM_TF_Outdoors20160625105627819"/>
+      <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="NASA_Fires___Past_24_hours20160625110132386"/>
       <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:32651" srcDatumTransform="-1" destDatumTransform="-1" layerid="coastal_ecosystems20160531024847474"/>
       <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:32651" srcDatumTransform="-1" destDatumTransform="-1" layerid="coastal_mapping_tracks20160531093037783"/>
+      <layer_coordinate_transform destAuthId="EPSG:32651" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="OSM_TF_Landscape20160625105549491"/>
     </layer_coordinate_transform_info>
   </mapcanvas>
   <layer-tree-canvas>
@@ -59,6 +75,10 @@
       <item>coastal_ecosystems20160624122548878</item>
       <item>OSM_Mapnik20160624124645270</item>
       <item>OSM_Mapnik20160624125602759</item>
+      <item>OSM_TF_Landscape20160625105549491</item>
+      <item>OSM_TF_Outdoors20160625105627819</item>
+      <item>NASA_Fires___Past_24_hours20160625110132386</item>
+      <item>Landsat__Gis_Lab_info_20160625110141211</item>
     </custom-order>
   </layer-tree-canvas>
   <legend updateDrawingOrder="true">
@@ -87,11 +107,106 @@
         <legendlayerfile isInOverview="0" layerid="OSM_Mapnik20160624125602759" visible="1"/>
       </filegroup>
     </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="OSM TF Landscape" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="OSM_TF_Landscape20160625105549491" visible="1"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="OSM TF Outdoors" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="OSM_TF_Outdoors20160625105627819" visible="1"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="NASA Fires - Past 24 hours" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="NASA_Fires___Past_24_hours20160625110132386" visible="1"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="Landsat (Gis-Lab.info)" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="Landsat__Gis_Lab_info_20160625110141211" visible="1"/>
+      </filegroup>
+    </legendlayer>
   </legend>
   <projectlayers>
     <maplayer minimumScale="0" maximumScale="1e+08" type="plugin" hasScaleBasedVisibilityFlag="0" name="PyTiledLayer">
-      <id>OSM_Mapnik20160624124645270</id>
+      <id>Landsat__Gis_Lab_info_20160625110141211</id>
       <datasource></datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>Landsat (Gis-Lab.info)</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
+          <srsid>3857</srsid>
+          <srid>3857</srid>
+          <authid>EPSG:3857</authid>
+          <description>WGS 84 / Pseudo Mercator</description>
+          <projectionacronym>merc</projectionacronym>
+          <ellipsoidacronym>WGS84</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="blendMode" value="SourceOver"/>
+        <property key="brigthness" value="0"/>
+        <property key="contrast" value="1"/>
+        <property key="credit" value=""/>
+        <property key="creditVisibility" value="0"/>
+        <property key="grayscaleRender" value="0"/>
+        <property key="serviceUrl" value="http://irs.gis-lab.info/?layers=landsat&amp;request=GetTile&amp;z={z}&amp;x={x}&amp;y={y}"/>
+        <property key="smoothRender" value="1"/>
+        <property key="title" value="Landsat (Gis-Lab.info)"/>
+        <property key="transparency" value="0"/>
+        <property key="yOriginTop" value="1"/>
+        <property key="zmax" value="18"/>
+        <property key="zmin" value="0"/>
+      </customproperties>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+      <id>NASA_Fires___Past_24_hours20160625110132386</id>
+      <datasource>format=image/png&amp;crs=EPSG:4326&amp;layers=fires24&amp;styles=&amp;url=https://firms.modaps.eosdis.nasa.gov/wms/?</datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <attribution href="">NASA LANCE - FIRMS, 2011. MODIS Active Fire Detections. Data set</attribution>
+      <layername>NASA Fires - Past 24 hours</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=longlat +datum=WGS84 +no_defs</proj4>
+          <srsid>3452</srsid>
+          <srid>4326</srid>
+          <authid>EPSG:4326</authid>
+          <description>WGS 84</description>
+          <projectionacronym>longlat</projectionacronym>
+          <ellipsoidacronym>WGS84</ellipsoidacronym>
+          <geographicflag>true</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="identify/format" value="Undefined"/>
+      </customproperties>
+      <provider>wms</provider>
+      <noData>
+        <noDataList bandNo="1" useSrcNoData="0"/>
+      </noData>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <pipe>
+        <rasterrenderer opacity="1" alphaBand="-1" band="1" type="singlebandcolordata">
+          <rasterTransparency/>
+        </rasterrenderer>
+        <brightnesscontrast brightness="0" contrast="0"/>
+        <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
+        <rasterresampler maxOversampling="2"/>
+      </pipe>
+      <blendMode>0</blendMode>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="plugin" hasScaleBasedVisibilityFlag="0" name="PyTiledLayer">
+      <id>OSM_Mapnik20160624124645270</id>
+      <datasource>.</datasource>
       <keywordList>
         <value></value>
       </keywordList>
@@ -127,7 +242,7 @@
     </maplayer>
     <maplayer minimumScale="0" maximumScale="1e+08" type="plugin" hasScaleBasedVisibilityFlag="0" name="PyTiledLayer">
       <id>OSM_Mapnik20160624125602759</id>
-      <datasource></datasource>
+      <datasource>.</datasource>
       <keywordList>
         <value></value>
       </keywordList>
@@ -155,6 +270,78 @@
         <property key="serviceUrl" value="http://tile.openstreetmap.org/{z}/{x}/{y}.png"/>
         <property key="smoothRender" value="1"/>
         <property key="title" value="OSM Mapnik"/>
+        <property key="transparency" value="0"/>
+        <property key="yOriginTop" value="1"/>
+        <property key="zmax" value="19"/>
+        <property key="zmin" value="0"/>
+      </customproperties>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="plugin" hasScaleBasedVisibilityFlag="0" name="PyTiledLayer">
+      <id>OSM_TF_Landscape20160625105549491</id>
+      <datasource></datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <attribution href="https://www.openstreetmap.org/copyright">Maps © Thunderforest, Data © OpenStreetMap contributors</attribution>
+      <layername>OSM TF Landscape</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
+          <srsid>3857</srsid>
+          <srid>3857</srid>
+          <authid>EPSG:3857</authid>
+          <description>WGS 84 / Pseudo Mercator</description>
+          <projectionacronym>merc</projectionacronym>
+          <ellipsoidacronym>WGS84</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="blendMode" value="SourceOver"/>
+        <property key="brigthness" value="0"/>
+        <property key="contrast" value="1"/>
+        <property key="credit" value="Maps © Thunderforest, Data © OpenStreetMap contributors"/>
+        <property key="creditVisibility" value="0"/>
+        <property key="grayscaleRender" value="0"/>
+        <property key="serviceUrl" value="http://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png"/>
+        <property key="smoothRender" value="1"/>
+        <property key="title" value="OSM TF Landscape"/>
+        <property key="transparency" value="0"/>
+        <property key="yOriginTop" value="1"/>
+        <property key="zmax" value="19"/>
+        <property key="zmin" value="0"/>
+      </customproperties>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="plugin" hasScaleBasedVisibilityFlag="0" name="PyTiledLayer">
+      <id>OSM_TF_Outdoors20160625105627819</id>
+      <datasource></datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <attribution href="https://www.openstreetmap.org/copyright">Maps © Thunderforest, Data © OpenStreetMap contributors</attribution>
+      <layername>OSM TF Outdoors</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
+          <srsid>3857</srsid>
+          <srid>3857</srid>
+          <authid>EPSG:3857</authid>
+          <description>WGS 84 / Pseudo Mercator</description>
+          <projectionacronym>merc</projectionacronym>
+          <ellipsoidacronym>WGS84</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="blendMode" value="SourceOver"/>
+        <property key="brigthness" value="0"/>
+        <property key="contrast" value="1"/>
+        <property key="credit" value="Maps © Thunderforest, Data © OpenStreetMap contributors"/>
+        <property key="creditVisibility" value="0"/>
+        <property key="grayscaleRender" value="0"/>
+        <property key="serviceUrl" value="http://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png"/>
+        <property key="smoothRender" value="1"/>
+        <property key="title" value="OSM TF Outdoors"/>
         <property key="transparency" value="0"/>
         <property key="yOriginTop" value="1"/>
         <property key="zmax" value="19"/>
@@ -1373,6 +1560,15 @@ def my_form_open(dialog, layer, feature):
       <DistanceUnits type="QString"></DistanceUnits>
       <AreaUnits type="QString"></AreaUnits>
     </Measurement>
+    <NorthArrow>
+      <MarginV type="int">0</MarginV>
+      <MarginH type="int">0</MarginH>
+      <Rotation type="int">0</Rotation>
+      <Enabled type="bool">false</Enabled>
+      <Placement type="int">0</Placement>
+      <Automatic type="bool">true</Automatic>
+      <MarginUnit type="QString">MM</MarginUnit>
+    </NorthArrow>
     <SpatialRefSys>
       <ProjectCRSProj4String type="QString">+proj=longlat +datum=WGS84 +no_defs</ProjectCRSProj4String>
       <ProjectCrs type="QString">EPSG:4326</ProjectCrs>
