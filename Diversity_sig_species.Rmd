@@ -42,7 +42,7 @@ nursery_columns <- c(c("location","depth","transect","date","nursery_diversity",
 df.nursery_sample_data <- df.sample_data[nursery_columns] # subset of the data with only the nursery species
 ```
 
-## Calculate diversity and number of nursery fish species
+## Calculate diversity and number of nursery fish species (mangrove AND seagrass)
 
 ```{r diversity_sign_species}
 
@@ -118,3 +118,81 @@ Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
   #>0.05 = model 2 predicts data significantly better than model 1 {eliminate variabele with highest p-value}
   #<0.05 = model 2 predicts data significantly less than model 1 {end result}
 ```
+
+## Calculate diversity and number of nursery fish species (mangrove AND seagrass); without species only significant with interaction (size/distance*depth)
+
+```{r diversity_sign_species2}
+
+sig_species <-df.species_all[c(2,25,28,36,39,42,47,52,53,54,58,88,94,95,96,97,98,99,102,103,104),]
+
+#calculate the Shannon-Wiener diversity (with diversity function from vegan package) for SIGNIFICANT nursery species
+df.sample_data$sig_nurs_diversity <- apply(df.sample_data[sig_species$colname], MARGIN=1, diversity)
+
+#calculate the number of nursery fish species
+df.sample_data$sig_nurs_species <- apply(df.sample_data[c(sig_species$colname_pres)],MARGIN=1,sum)
+
+#calculate number of SIGNFICANT nursery fish
+df.sample_data$sig_nurs_num <- apply(df.sample_data[sig_species$colname], MARGIN=1, sum)
+```
+
+```{r summary_per_site2}
+df.summarydata <- aggregate(df.sample_data[c('sig_nurs_num','sig_nurs_diversity','sig_nurs_species')], by=list(df.sample_data$location), FUN=function(x) c(mean=mean(x), sum=sum(x),sd=sd(x),n=length(x)))
+df.summarydata <- do.call(data.frame, df.summarydata)
+```
+This is the result per significant nursery species
+```{r display_summary_per_site2, warning=FALSE, message=FALSE, echo=FALSE, eval=TRUE}
+knitr::kable(df.summarydata)
+```
+
+##GLM on diversity of nursery fish species (log(size) & log(distance))
+
+Gaussian GLM, since sig_nurs_diversity is a diversity-value not abundance
+
+```{r glm_div_loop2}
+  res <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * depth * north, data = df.sample_data)
+
+  summary(res)
+
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch(
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) 
+
+```
+
+``` {r likelihood_diversity2}
+  model1 <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * depth * north, data = df.sample_data)
+  model2 <- glm(formula = sig_nurs_diversity ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * north, data = df.sample_data)
+  lrtest(model1, model2)
+  #>0.05 = model 2 predicts data significantly better than model 1 {eliminate variabele with highest p-value}
+  #<0.05 = model 2 predicts data significantly less than model 1 {end result}
+```
+
+##GLM on number of nursery fish species
+
+```{r glm_sp_loop2}
+  res <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * depth * north, data= df.sample_data)
+  
+  summary(res)
+  
+  par(mfrow=c(1,2)) 
+  plot(fitted(res),residuals(res),xlab="Fitted values", ylab="Residuals", abline(h=0, lty=2))
+  tryCatch(
+    lines(smooth.spline(fitted(res), residuals(res))), 
+    error=function(e){}  )
+  qqnorm(res$residuals)
+  qqline(res$residuals) 
+
+```
+
+``` {r likelihood_species_2}
+  model1 <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * depth * north, data = df.sample_data)
+  model2 <- glm(formula = sig_nurs_species ~ log(distance_seagrass) * log(size_seagrass) * log(distance_mangroves) * log(size_mangroves) * mpa * north, data = df.sample_data)
+  lrtest(model1, model2)
+  #>0.05 = model 2 predicts data significantly better than model 1 {eliminate variabele with highest p-value}
+  #<0.05 = model 2 predicts data significantly less than model 1 {end result}
+```
+
