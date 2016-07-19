@@ -1,0 +1,30 @@
+---
+title: "Graph sample"
+author: 'Dirkje Verhoeven, Dolf Andringa, Annelies Andringa: Marine Conservation Philippines'
+date: "19 July 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+load('data.RDa') #load the data
+library('ggplot2')
+df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
+attach(df.sample_data)
+```
+A graph with the distance to mangroves and the abundance of *Abudefduf sexfasciatus*
+See also http://www.r-bloggers.com/ggplot2-cheatsheet-for-scatterplots/ and http://www.cookbook-r.com/Graphs/Scatterplots_(ggplot2)/ for more info.
+```{r plot}
+#setup a plot and define the axes
+plt <- ggplot(df.sample_data, aes(x=distance_mangroves, y=abudefduf_sexfasciatus)) + xlab('Distance to mangroves (m)') + ylab('Abundance Abudefduf sexfasciatus')
+#add the points
+plt <- plt + geom_point()
+#calculate mean abyundance for each size_seagrass so we can plot a line with that info
+agg <- aggregate(abudefduf_sexfasciatus, by=list(distance_mangroves=distance_mangroves), FUN=mean)
+agg$abudefduf_sexfasciatus <- agg$x
+#add a line to the plot with the aggregated data.
+plt <- plt + geom_line(data=agg)
+#show the plot
+plt
+```
+
