@@ -19,7 +19,7 @@ See also http://www.r-bloggers.com/ggplot2-cheatsheet-for-scatterplots/ and http
 plt <- ggplot(df.sample_data, aes(x=distance_mangroves, y=abudefduf_sexfasciatus)) + xlab('Distance to mangroves (m)') + ylab('Abundance Abudefduf sexfasciatus')
 #add the points
 plt <- plt + geom_point()
-#calculate mean abyundance for each size_seagrass so we can plot a line with that info
+#calculate mean abyundance for each distance_mangroves so we can plot a line with that info
 agg <- aggregate(abudefduf_sexfasciatus, by=list(distance_mangroves=distance_mangroves), FUN=mean)
 agg$abudefduf_sexfasciatus <- agg$x
 #add a line to the plot with the aggregated data.
