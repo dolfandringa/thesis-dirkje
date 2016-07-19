@@ -47,3 +47,201 @@ plt <- plt + geom_line(data=agg, color="red")
 plt
 ```
 
+#Seagrass
+
+```{r abu_vaig_plot}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=abudefduf_vaigiensis)) + xlab('Distance to seagrass (m)') + ylab('Abundance Abudefduf vaigiensis')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$abudefduf_vaigiensis, by=list(distance_seagrass=df.sample_data$distance_seagrass), FUN=mean)
+agg$abudefduf_vaigiensis <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r che_qui}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=cheilodipterus_quinquelineatus)) + xlab('Distance to seagrass (m)') + ylab('Abundance Cheilodipterus quinquelineatus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$cheilodipterus_quinquelineatus, by=list(distance_seagrass=df.sample_data$distance_seagrass), FUN=mean)
+agg$cheilodipterus_quinquelineatus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r hal_hor}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=halichoeres_hortulanus)) + xlab('Distance to seagrass (m)') + ylab('Abundance Halichoeres hortulanus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$halichoeres_hortulanus, by=list(distance_seagrass=df.sample_data$distance_seagrass), FUN=mean)
+agg$halichoeres_hortulanus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r lut_ful}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=lutjanus_fulviflamma)) + xlab('Distance to seagrass (m)') + ylab('Abundance Lutjanus fulviflamma')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$lutjanus_fulviflamma, by=list(distance_seagrass=df.sample_data$distance_seagrass), FUN=mean)
+agg$lutjanus_fulviflamma <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r mul_fla}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=mulloidichthys_flavolineatus)) + xlab('Distance to seagrass (m)') + ylab('Abundance Mulloidichthys flavolineatus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$mulloidichthys_flavolineatus, by=list(distance_seagrass=df.sample_data$distance_seagrass), FUN=mean)
+agg$mulloidichthys_flavolineatus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r par_bar}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=parupeneus_barberinoides)) + xlab('Distance to seagrass (m)') + ylab('Abundance Parupeneus barberinoides')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$parupeneus_barberinoides, by=list(distance_seagrass=df.sample_data$distance_seagrass), FUN=mean)
+agg$parupeneus_barberinoides <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r par_bar2}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=parupeneus_barberinus)) + xlab('Distance to seagrass (m)') + ylab('Abundance Parupeneus barberinus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$parupeneus_barberinus, by=list(distance_seagrass=df.sample_data$distance_seagrass), FUN=mean)
+agg$parupeneus_barberinus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+#Mangroves
+
+```{r m_abu_sex_plot}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_mangroves), y=abudefduf_sexfasciatus)) + xlab('Distance to mangroves (m)') + ylab('Abundance Abudefduf sexfasciatus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$abudefduf_sexfasciatus, by=list(distance_mangroves=df.sample_data$distance_mangroves), FUN=mean)
+agg$abudefduf_sexfasciatus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r m_abu_vaig_plot}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_mangroves), y=abudefduf_vaigiensis)) + xlab('Distance to mangroves (m)') + ylab('Abundance Abudefduf vaigiensis')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$abudefduf_vaigiensis, by=list(distance_mangroves=df.sample_data$distance_mangroves), FUN=mean)
+agg$abudefduf_vaigiensis <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r m_che_qui}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_mangroves), y=cheilodipterus_quinquelineatus)) + xlab('Distance to mangroves (m)') + ylab('Abundance Cheilodipterus quinquelineatus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$cheilodipterus_quinquelineatus, by=list(distance_mangroves=df.sample_data$distance_mangroves), FUN=mean)
+agg$cheilodipterus_quinquelineatus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r m_hal_hor}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_mangroves), y=halichoeres_hortulanus)) + xlab('Distance to mangroves (m)') + ylab('Abundance Halichoeres hortulanus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$halichoeres_hortulanus, by=list(distance_mangroves=df.sample_data$distance_mangroves), FUN=mean)
+agg$halichoeres_hortulanus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r m_lut_ful}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_mangroves), y=lutjanus_fulviflamma)) + xlab('Distance to mangroves (m)') + ylab('Abundance Lutjanus fulviflamma')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$lutjanus_fulviflamma, by=list(distance_mangroves=df.sample_data$distance_mangroves), FUN=mean)
+agg$lutjanus_fulviflamma <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r m_mul_fla}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_mangroves), y=mulloidichthys_flavolineatus)) + xlab('Distance to mangroves (m)') + ylab('Abundance Mulloidichthys flavolineatus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$mulloidichthys_flavolineatus, by=list(distance_mangroves=df.sample_data$distance_mangroves), FUN=mean)
+agg$mulloidichthys_flavolineatus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r m_par_bar}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_mangroves), y=parupeneus_barberinoides)) + xlab('Distance to mangroves (m)') + ylab('Abundance Parupeneus barberinoides')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$parupeneus_barberinoides, by=list(distance_mangroves=df.sample_data$distance_mangroves), FUN=mean)
+agg$parupeneus_barberinoides <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
+
+```{r m_par_bar2}
+
+plt <- ggplot(df.sample_data, aes(x=log(distance_mangroves), y=parupeneus_barberinus)) + xlab('Distance to mangroves (m)') + ylab('Abundance Parupeneus barberinus')
+
+plt <- plt + geom_point()
+
+agg <- aggregate(df.sample_data$parupeneus_barberinus, by=list(distance_mangroves=df.sample_data$distance_mangroves), FUN=mean)
+agg$parupeneus_barberinus <- agg$x 
+
+plt <- plt + geom_line(data=agg)
+plt 
+```
