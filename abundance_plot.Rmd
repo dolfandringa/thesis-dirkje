@@ -10,20 +10,39 @@ knitr::opts_chunk$set(echo = TRUE)
 load('data.RDa') #load the data
 library('ggplot2')
 df.sample_data <- merge(x=df.sample_data, y=df.sites, by.x="location", by.y="name", all.x=TRUE)
-attach(df.sample_data)
 ```
-A graph with the distance to mangroves and the abundance of *Abudefduf sexfasciatus*
-See also http://www.r-bloggers.com/ggplot2-cheatsheet-for-scatterplots/ and http://www.cookbook-r.com/Graphs/Scatterplots_(ggplot2)/ for more info.
+
+A graph with the distance to seagrass and the abundance of *Abudefduf sexfasciatus*
+See also http://www.r-bloggers.com/ggplot2-cheatsheet-for-scatterplots/ and http://www.cookbook-r.com/Graphs/Scatterplots_(ggplot2)/ for more info. The line represents the mean of the abundance of the species plotted for each distance to seagrass
 ```{r plot}
 #setup a plot and define the axes
-plt <- ggplot(df.sample_data, aes(x=distance_mangroves, y=abudefduf_sexfasciatus)) + xlab('Distance to mangroves (m)') + ylab('Abundance Abudefduf sexfasciatus')
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=abudefduf_sexfasciatus)) + xlab('Distance to seagrass (m)') + ylab('Abundance Abudefduf sexfasciatus')
 #add the points
 plt <- plt + geom_point()
-#calculate mean abyundance for each distance_mangroves so we can plot a line with that info
-agg <- aggregate(abudefduf_sexfasciatus, by=list(distance_mangroves=distance_mangroves), FUN=mean)
-agg$abudefduf_sexfasciatus <- agg$x
+#calculate mean abundance for each distance_seagrass so we can plot a line with that info
+agg <- aggregate(df.sample_data$abudefduf_sexfasciatus, by=list(distance_seagrass=df.sample_data$distance_seagrass), FUN=mean)
+agg$abudefduf_sexfasciatus <- agg$x #just rename the variable so it is the same as the original axis
 #add a line to the plot with the aggregated data.
 plt <- plt + geom_line(data=agg)
+plt #show the plot
+```
+
+It is also possible to show a plot with the predicted values according to a GLM in the polt as a line.
+```{r plot_glm}
+#first create the glm model.
+f <- df.sample_data$abudefduf_sexfasciatus ~ log(df.sample_data$distance_seagrass) * log(df.sample_data$size_seagrass) * df.sample_data$mpa * df.sample_data$north * df.sample_data$depth
+model <- glm(f, family='poisson')
+
+#then calculate the mean predicted abundance (based on the model) for each distance_seagrass because that is what we want to plot.
+agg <- aggregate(model$fitted.values, by=list(distance_seagrass = df.sample_data$distance_seagrass), FUN=mean)
+agg$abudefduf_sexfasciatus <- agg$x
+
+#make the plot:
+plt <- ggplot(df.sample_data, aes(x=log(distance_seagrass), y=abudefduf_sexfasciatus)) + xlab('ln(Distance to seagrass) (m)') + ylab('Abundance Abudefduf sexfasciatus')
+#add the points
+plt <- plt + geom_point()
+#add the line
+plt <- plt + geom_line(data=agg, color="red")
 #show the plot
 plt
 ```
